@@ -1,0 +1,86 @@
+<!--
+     Copyright 2016 Revelant Technologies LLC
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+
+    /****************************************************************************************************
+    ** Page Name   : StatusChangeOnCase
+    ** Created By  : Revelant Technologies
+    *                   Revelant Team - info@revelanttech.com
+    ** Created Date: May 2016
+    ** Description : Demonstrates the current status is in sync with salesforce and purecloud
+    ** Page params : none
+    ** Change Log  :
+    ****************************************************************************************************/
+-->
+
+<apex:page showHeader="false" standardStylesheets="false" standardController="Case">
+    <apex:includescript value="/support/console/36.0/integration.js" />
+    <apex:includescript value="/support/api/36.0/interaction.js" />
+    <apex:includescript value="{!URLFOR($Resource.jQuery)}" />
+    <apex:stylesheet value="{!URLFOR($Resource.bootstrapNew,'css/bootstrap.min.css')}" />
+    <apex:includescript value="{!URLFOR($Resource.bootstrapNew,'js/bootstrap.min.js')}" />
+    
+    <div class="row text-center">
+        <div class="col-md-4 col-sm-6 hero-feature"></div>
+        <div class="col-md-4 col-sm-6 hero-feature">
+            <div class="thumbnail">
+                <div class="caption">
+                    <p>
+                        <apex:form >
+                            <apex:commandButton styleClass="currentStatus btn btn-danger" value="Busy"/>
+                        </apex:form>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        sforce.console.addEventListener('inin.salesforce.constants.consoleevent.pc.UPDATE_STATUS', function(data){
+            console.log('**********************UPDATE_STATUS: ' + JSON.stringify(data));
+            var status = JSON.stringify(data);
+            console.log('************************************* status: '+ status.includes("AVAILABLE"));
+            if(status.includes("AVAILABLE")) {
+                $('.currentStatus').val('Available');
+                $('.currentStatus').attr('class','btn btn-success currentStatus');
+            } else if(status.includes("ON_QUEUE")) {
+                $('.currentStatus').val('On Queue');
+                $('.currentStatus').attr('class','btn btn-info currentStatus');
+            } else if(status.includes("BUSY")) {
+                $('.currentStatus').val('Busy');
+                $('.currentStatus').attr('class','btn btn-danger currentStatus');
+            } else if(status.includes("AWAY")) {
+                $('.currentStatus').val('Away');
+                $('.currentStatus').attr('class','btn btn-warning currentStatus');
+            }
+        });
+
+        var statusMap = {PureCloud:{available:"AVAILABLE", queue:"ON_QUEUE",busy:"BUSY"}};
+        sforce.console.addEventListener('inin.salesforce.constants.consoleevent.pc.INTERACTION_CONNECTED', function(data){
+            console.log('**********************INTERACTION_CONNECTED: ' +JSON.stringify(data));
+            sforce.console.fireEvent('inin.salesforce.constants.consoleevent.changestatus', statusMap.PureCloud.busy, function(data){console.log(data);});
+            sforce.console.presence.setServicePresenceStatus(statusMap.PureCloud.busy);
+            console.log('**********************fireEvent:changestatus change to BUSY: ' +JSON.stringify(data));
+            $('.currentStatus').val('Busy');$('.currentStatus').attr('class','btn btn-danger currentStatus');
+        });
+
+        sforce.console.addEventListener('inin.salesforce.constants.consoleevent.pc.INTERACTION_DISCONNECTED', function(data){
+            console.log('Function called from StatusChange page');
+            console.log('**********************INTERACTION_DISCONNECTED: ' +JSON.stringify(data));
+            sforce.console.fireEvent('inin.salesforce.constants.consoleevent.changestatus', statusMap.PureCloud.available, function(data){console.log(data);});
+            sforce.console.presence.setServicePresenceStatus(statusMap.PureCloud.available);
+            console.log('**********************fireEvent:changestatus change to AVAILABLE: ' +JSON.stringify(data));
+        });
+    </script>
+</apex:page>
