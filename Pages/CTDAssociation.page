@@ -1,0 +1,261 @@
+<!--
+     Copyright 2016 Revelant Technologies LLC
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+
+    /****************************************************************************************************
+    ** Page Name   : CTDAssociation
+    ** Created By  : Revelant Technologies
+    *                   Revelant Team - info@revelanttech.com
+    ** Created Date: April 2016
+    ** Description : Example of auto populating the related to objects within a call
+    ** Page params : none
+    ** Change Log  :
+    ****************************************************************************************************/
+-->
+
+<apex:page standardcontroller="Account" extensions="CTDAssociationController" showheader="true" standardstylesheets="false">
+    <html>
+        <head>
+            <apex:includescript value="{!URLFOR($Resource.jQuery)}" />
+            <apex:stylesheet value="{!URLFOR($Resource.bootstrapNew,'css/bootstrap.min.css')}" />
+            <apex:includescript value="{!URLFOR($Resource.bootstrapNew,'js/bootstrap.min.js')}" />
+            <apex:includescript value="/support/console/36.0/integration.js" />
+            <apex:includescript value="/support/api/36.0/interaction.js" />
+            <style>
+
+
+                #special-heading h1 {
+                    font-size: 62px !important;
+                    color: #065271;
+                    margin-top: 10px;
+                    margin-bottom: 10px;
+                    align: center;
+                }
+
+                #special-heading p {
+                    font-size: 20px !important;
+                }
+
+
+                #special-heading .buffer {
+                    margin-top: 10px;
+                }
+
+    
+                #special-heading h6 {
+                    font-size: 15px !important;
+                    padding-left: 400px;
+                }
+    
+                #special-heading h2 {
+                    padding-left: 500px;
+                }
+    
+                #special-heading h3 {
+                    font-size: 35px !important;
+                }
+
+                #special-heading h4 {
+                    font-size: 25px !important;
+                    align: left;
+                    padding-right: 100px;
+                }
+
+                #special-heading a; {
+                    font-size: 15px !important;
+                }
+    
+                #special-heading .list-group-item.active, .list-group-item.active:hover, .list-group-item.active:focus {
+                    z-index: 2;
+                    color: #fff;
+                    background-color: #c35e28;
+                    border-color: #c35e28;
+                    width: 100%;
+                }
+            </style>
+        </head>
+        <body>
+            <br />
+            <div id="special-heading" align="center">
+                 <!--
+                     /****************************************************************************************************
+                     ** Title - the component won't work as well here because of the showheader="true" in the apex:page
+                     ****************************************************************************************************/
+                 -->
+
+                <div class="row clearfix">
+                    <div class="col-xs-2"></div>
+                    <div class="buffer col-xs-8" >
+                        <h1 style="color:#065271; margin-bottom: 10px; text-align:center;">PureCloud for Salesforce Demo</h1>
+                    </div>
+                    <div class="col-xs-2">
+                        <apex:image value="{!URLFOR($Resource.RevLogo)}" />
+
+                    </div>
+                </div>
+                <br />
+
+                <ul class="list-group">
+                    <li class="list-group-item active" align="center"><h3 class="list-group-item-heading">2.4. Click to Dial w/ Associations</h3></li>
+                </ul>
+                <apex:form >
+                    <!--
+                        /****************************************************************************************************
+                        ** Basic ClickToDial row
+                        ****************************************************************************************************/
+                    -->
+
+                    <div class="row text-center clearfix">
+                        <div class="col-xs-2"></div>
+                        <div class="col-xs-4">
+                            <div class="thumbnail">
+                                <div class="caption">
+                                    <h3>Basic ClickToDial</h3>
+                                    <p>
+                                           
+                                    </p>
+                                    <p><support:clicktodial number="3172222222" /></p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xs-4">
+                            <h4><b>Scenario:</b>  Uses support:ClickToDial feature with no associations.  <b>Name</b> and <b>Related To</b> can be added by clicking on objects throughout the call.</h4>
+                        </div>
+                        <div class="col-xs-2"></div>
+                    </div>
+
+                    <!--
+                        /****************************************************************************************************
+                        ** For Sales Call row
+                        ****************************************************************************************************/
+                    -->
+
+                    <div class="row text-center clearfix">
+                        <div class="col-xs-2"></div>
+                        <div class="col-xs-4">
+                            <div class="thumbnail">
+                                <div class="caption">
+                                    <h3>For Sales Call</h3>
+                                    <p>
+                                        <b>Account:  </b>
+                                        <!-- //mini page layout on hover -->
+                                        <a href="/{!acc.id}"
+                                            id="lookup{!acc.id}opp2"
+                                            onblur="LookupHoverDetail.getHover('lookup{!acc.id}opp2').hide();"
+                                            onfocus="LookupHoverDetail.getHover('lookup{!acc.id}opp2', '/{!acc.id}/m?retURL=/{!acc.id}&isAjaxRequest=1').show();"
+                                            onmouseout="LookupHoverDetail.getHover('lookup{!acc.id}opp2').hide();"
+                                            onmouseover="LookupHoverDetail.getHover('lookup{!acc.id}opp2', '/{!acc.id}/m?retURL=/{!acc.id}&isAjaxRequest=1').show();">
+                                            {!acc.Name}
+                                        </a>
+
+                                    </p>
+                                    <p><support:clicktodial number="3172222222" params="{!JsonSales}" /></p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xs-4">
+                            <h4><b>Scenario:</b>  For Agent efficiency, we can pre-load the <b>Name</b> and <b>Related To</b> in the Call Log.  In this instance, we are loading <b>Name</b> with Sales Contacts related to the Account.  <b>Related To</b> is pre-loaded with related Opportunities.</h4>
+                        </div>
+                        <div class="col-xs-2"></div>
+                    </div>
+
+                    <!--
+                        /****************************************************************************************************
+                        ** For Service Call row
+                        ****************************************************************************************************/
+                    -->
+                    <div class="row text-center clearfix">
+                        <div class="col-xs-2"></div>
+                        <div class="col-xs-4">
+                            <div class="thumbnail">
+                                <div class="caption">
+                                    <h3>For Service Call</h3>
+                                    <p>
+                                        <b>Account:  </b>
+                                           <!-- //mini page layout on hover -->
+                                        <a href="/{!acc.id}"
+                                           id="lookup{!acc.id}opp3"
+                                           onblur="LookupHoverDetail.getHover('lookup{!acc.id}opp3').hide();"
+                                           onfocus="LookupHoverDetail.getHover('lookup{!acc.id}opp3', '/{!acc.id}/m?retURL=/{!acc.id}&isAjaxRequest=1').show();"
+                                           onmouseout="LookupHoverDetail.getHover('lookup{!acc.id}opp3').hide();"
+                                           onmouseover="LookupHoverDetail.getHover('lookup{!acc.id}opp3', '/{!acc.id}/m?retURL=/{!acc.id}&isAjaxRequest=1').show();">
+                                            {!acc.Name}
+                                        </a>
+                                    </p>
+                                    <p><support:clicktodial number="3172222222" params="{!JsonService}" /></p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xs-4">
+                            <h4><b>Scenario:</b>  In contrast, for a Service Call, we can pre-load <b>Name</b> and <b>Related To</b> with Service Contacts and Cases, respectively.</h4>
+                        </div>
+                        <div class="col-xs-2"></div>
+                    </div>
+
+                    <!--
+                        /****************************************************************************************************
+                        ** For Combined Call row
+                        ****************************************************************************************************/
+                    -->
+
+                    <div class="row text-center clearfix">
+                        <div class="col-xs-2"></div>
+                        <div class="col-xs-4">
+                            <div class="thumbnail">
+                                <div class="caption">
+                                    <h3>Combined Call</h3>
+                                    <p>
+                                        <b>Account:  </b>
+                                        <!-- //mini page layout on hover -->
+                                        <a href="/{!acc.id}"
+                                            id="lookup{!acc.id}opp4"
+                                            onblur="LookupHoverDetail.getHover('lookup{!acc.id}opp4').hide();"
+                                            onfocus="LookupHoverDetail.getHover('lookup{!acc.id}opp4', '/{!acc.id}/m?retURL=/{!acc.id}&isAjaxRequest=1').show();"
+                                            onmouseout="LookupHoverDetail.getHover('lookup{!acc.id}opp4').hide();"
+                                            onmouseover="LookupHoverDetail.getHover('lookup{!acc.id}opp4', '/{!acc.id}/m?retURL=/{!acc.id}&isAjaxRequest=1').show();">
+                                            {!acc.Name}
+                                        </a>
+                                    </p>
+                                    <p><support:clicktodial number="3172222222" params="{!JsonCombined}" /></p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xs-4">
+                            <h4><b>Scenario:</b>  Just for fun, let's pre-load <b>Name</b> with all Contacts and Leads related to the Account.  <b>Related To</b> will be pre-loaded with the Account's Opportunities and Cases.  The objects can be of various types.</h4>
+                        </div>
+                        <div class="col-xs-2"></div>
+                    </div>
+                </apex:form>
+            </div>
+            <script>
+                var statusMap = {PureCloud:{available:"AVAILABLE", queue:"ON_QUEUE",busy:"BUSY"}};
+                sforce.console.addEventListener('inin.salesforce.constants.consoleevent.pc.INTERACTION_CONNECTED', function(data){
+                    console.log('**********************INTERACTION_CONNECTED: ' +JSON.stringify(data));
+                    sforce.console.fireEvent('inin.salesforce.constants.consoleevent.changestatus', statusMap.PureCloud.busy, function(data){console.log(data);});
+                    sforce.console.presence.setServicePresenceStatus(statusMap.PureCloud.busy);
+                    console.log('**********************fireEvent:changestatus change to BUSY: ' +JSON.stringify(data));
+                });
+
+                sforce.console.addEventListener('inin.salesforce.constants.consoleevent.pc.INTERACTION_DISCONNECTED', function(data){
+                            console.log('Function called from CTDAssociation page');
+                    console.log('**********************INTERACTION_DISCONNECTED: ' +JSON.stringify(data));
+                    sforce.console.fireEvent('inin.salesforce.constants.consoleevent.changestatus', statusMap.PureCloud.available, function(data){console.log(data);});
+                    sforce.console.presence.setServicePresenceStatus(statusMap.PureCloud.available);
+                    console.log('**********************fireEvent:changestatus change to AVAILABLE: ' +JSON.stringify(data));
+                });
+            </script>
+        </body>
+    </html>
+</apex:page>

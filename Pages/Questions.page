@@ -1,0 +1,128 @@
+<!--
+     Copyright 2016 Revelant Technologies LLC
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+
+    /****************************************************************************************************
+    ** Page Name   : Questions
+    ** Created By  : Revelant Technologies
+    *                   Revelant Team - info@revelanttech.com
+    ** Created Date: April 2016
+    ** Description : Instructions and feedback.
+    ** Page params : none
+    ** Change Log  :
+    ****************************************************************************************************/
+-->
+<apex:page showheader="false" standardstylesheets="false">
+    <html>
+        <head>
+            <apex:includescript value="{!URLFOR($Resource.jQuery)}" />
+            <apex:stylesheet value="{!URLFOR($Resource.bootstrapNew,'css/bootstrap.min.css')}" />
+            <apex:includescript value="{!URLFOR($Resource.bootstrapNew,'js/bootstrap.min.js')}" />
+            <script src="http://code.jquery.com/jquery-latest.min.js" type="text/javascript"></script>
+            <apex:includescript value="/support/console/36.0/integration.js" />
+            <apex:includescript value="/support/api/36.0/interaction.js" />
+            <style>
+                h4, h2 {
+                    font-size: 250%;
+                }
+
+                h3 {
+                    font-size: 300%;
+                }
+
+                h1 {
+                    font-size: 550%;
+                }
+
+                h4 {
+                    padding-left: 400px;
+                }
+
+                h2 {
+                    padding-left: 500px;
+                }
+
+                blockquote {
+                    padding: 6px 16px;
+                    border: none;
+                    quotes: "\201C" "\201D";
+                    display: inline-block;
+                    position: relative;
+                }
+
+                    blockquote:before {
+                        content: open-quote;
+                        font-weight: bold;
+                        font-size: 250%;
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                    }
+
+                    blockquote:after {
+                        content: close-quote;
+                        font-weight: bold;
+                        font-size: 250%;
+                        position: absolute;
+                        top: 0;
+                        right: 0;
+                    }
+
+                .list-group-item.active, .list-group-item.active:hover, .list-group-item.active:focus {
+                    z-index: 2;
+                    color: #fff;
+                    background-color: #c35e28;
+                    border-color: #c35e28;
+                }
+            </style>
+        </head>
+        <body>
+            <c:DemoTitle ></c:DemoTitle>
+            <ul class="list-group">
+                <li class="list-group-item active" align="center"><h3 class="list-group-item-heading">Questions</h3></li>
+            </ul>
+            <h3 style="padding-left: 100px">Our Conclusions:</h3>
+            <div style="float:left;padding-left:150px;">
+                <blockquote>
+                    <h3><p>Two amazing platforms properly integrated</p></h3>
+                    <footer>Bob</footer>
+                </blockquote>
+            </div>
+            <br />
+            <div style="float:left;padding-left:150px;">
+                <blockquote>
+                    <h3><p>CRM data is incomplete without this integration!</p></h3>
+                    <footer>Randolph</footer>
+                </blockquote>
+            </div>
+        </body>
+        <script>
+            var statusMap = {PureCloud:{available:"AVAILABLE", queue:"ON_QUEUE",busy:"BUSY"}};
+            sforce.console.addEventListener('inin.salesforce.constants.consoleevent.pc.INTERACTION_CONNECTED', function(data){
+                console.log('**********************INTERACTION_CONNECTED: ' +JSON.stringify(data));
+                sforce.console.fireEvent('inin.salesforce.constants.consoleevent.changestatus', statusMap.PureCloud.busy, function(data){console.log(data);});
+                sforce.console.presence.setServicePresenceStatus(statusMap.PureCloud.busy);
+                console.log('**********************fireEvent:changestatus change to BUSY: ' +JSON.stringify(data));
+            });
+
+            sforce.console.addEventListener('inin.salesforce.constants.consoleevent.pc.INTERACTION_DISCONNECTED', function(data){
+                console.log('**********************INTERACTION_DISCONNECTED: ' +JSON.stringify(data));
+                sforce.console.fireEvent('inin.salesforce.constants.consoleevent.changestatus', statusMap.PureCloud.available, function(data){console.log(data);});
+                sforce.console.presence.setServicePresenceStatus(statusMap.PureCloud.available);
+                console.log('**********************fireEvent:changestatus change to AVAILABLE: ' +JSON.stringify(data));
+            });
+        </script>
+    </html>
+</apex:page>

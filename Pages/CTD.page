@@ -1,0 +1,190 @@
+<!--
+     Copyright 2016 Revelant Technologies LLC
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+
+
+
+    /****************************************************************************************************
+    ** Page Name   : CTD, this is an acronym for ClickToDial (CTD)
+    ** Created By  : Revelant Technologies
+    *                   Revelant Team - info@revelanttech.com
+    ** Created Date: May 2016
+    ** Description : Example of changing status within a call
+    ** Page params : none
+    ** Change Log  :
+    ****************************************************************************************************/
+-->
+
+<apex:page showHeader="false" standardStylesheets="false">
+    <apex:includescript value="/support/console/36.0/integration.js" />
+    <apex:includescript value="/support/api/36.0/interaction.js" />
+    <apex:includescript value="{!URLFOR($Resource.jQuery)}" />
+    <apex:stylesheet value="{!URLFOR($Resource.bootstrapNew,'css/bootstrap.min.css')}" />
+    <apex:includescript value="{!URLFOR($Resource.bootstrapNew,'js/bootstrap.min.js')}" />
+    
+    <style type="text/css">
+        .statusSelection {
+            position: relative;
+            display: block;
+            padding-top: 6px;
+        }
+        #special-heading h1 {
+            font-size: 60px !important;
+            color: #065271;
+            margin-bottom: 10px;
+            align: center;
+        }
+    
+        #special-heading h6 {
+            font-size: 15px !important;
+            padding-left: 400px;
+        }
+    
+        #special-heading h2 {
+            padding-left: 500px;
+        }
+
+        #special-heading h3 {
+            font-size: 35px !important;
+        }
+
+        #special-heading h4 {
+            font-size: 25px !important;
+            padding-left: 100px;
+            padding-right: 100px;
+        }
+    
+        #special-heading a {
+            font-size: 15px !important;
+        }
+    
+        #special-heading .list-group-item.active, .list-group-item.active:hover, .list-group-item.active:focus {
+            z-index: 2;
+            color: #fff;
+            background-color: #c35e28;
+            border-color: #c35e28;
+        }
+    </style>
+    
+    <script type="text/javascript">
+        var statusMap = {PureCloud:{available:"AVAILABLE", queue:"ON_QUEUE",busy:"BUSY", away:"AWAY"}};
+
+        /********************************************************************************************************
+        ** Method Name : changeStatus
+        ** Created By  : Revelant Technologies
+        *                   Revelant Team - info@revelanttech.com
+        ** Created Date: May 2016
+        ** Description : change status on button click
+        ** Return type : none
+        ** Annotation  : none
+        ** Method Type : Instance
+        ** Parameters
+        *       @param status -String- Status to be changed.
+        ** Change Log  :
+        ********************************************************************************************************/
+        function changeStatus(status) {
+            if(status == 'available'){
+                sforce.console.fireEvent('inin.salesforce.constants.consoleevent.changestatus', statusMap.PureCloud.available , function(data){console.log(data);});
+                sforce.console.presence.setServicePresenceStatus(statusMap.PureCloud.available);
+            }else if(status == 'onQueue'){
+                sforce.console.fireEvent('inin.salesforce.constants.consoleevent.changestatus', statusMap.PureCloud.queue , function(data){console.log(data);});
+                sforce.console.presence.setServicePresenceStatus(statusMap.PureCloud.queue);
+            }else if(status == 'busy'){
+                sforce.console.fireEvent('inin.salesforce.constants.consoleevent.changestatus', statusMap.PureCloud.busy, function(data){console.log(data);});
+                sforce.console.presence.setServicePresenceStatus(statusMap.PureCloud.busy);
+            }else if(status == 'away'){
+                sforce.console.fireEvent('inin.salesforce.constants.consoleevent.changestatus', statusMap.PureCloud.away, function(data){console.log(data);});
+                sforce.console.presence.setServicePresenceStatus(statusMap.PureCloud.away);
+            }
+        }
+
+        sforce.console.addEventListener('inin.salesforce.constants.consoleevent.pc.UPDATE_STATUS', function(data){
+            console.log('**********************UPDATE_STATUS: ' +JSON.stringify(data));
+            var status = JSON.stringify(data);
+            console.log('************************************* status: '+ status.includes("AVAILABLE"));
+            if(status.includes("AVAILABLE")) {
+                $('.currentStatus').val('Available');
+                $('.currentStatus').attr('class','btn btn-lg btn-success currentStatus');
+            } else if(status.includes("ON_QUEUE")) {
+                $('.currentStatus').val('On Queue');
+                $('.currentStatus').attr('class','btn btn-lg btn-info currentStatus');
+            } else if(status.includes("BUSY")) {
+                $('.currentStatus').val('Busy');
+                $('.currentStatus').attr('class','btn btn-lg btn-danger currentStatus');
+            }   else if(status.includes("AWAY")) {
+                $('.currentStatus').val('Away');
+                $('.currentStatus').attr('class','btn btn-lg btn-warning currentStatus');
+            }
+        });
+
+        sforce.console.addEventListener('inin.salesforce.constants.consoleevent.pc.INTERACTION_CONNECTED', function(data){
+            console.log('**********************INTERACTION_CONNECTED: ' +JSON.stringify(data));
+            sforce.console.fireEvent('inin.salesforce.constants.consoleevent.changestatus', statusMap.PureCloud.busy, function(data){console.log(data);});
+            sforce.console.presence.setServicePresenceStatus(statusMap.PureCloud.busy);
+            console.log('**********************fireEvent:changestatus change to BUSY: ' +JSON.stringify(data));
+            $('.currentStatus').val('Busy');$('.currentStatus').attr('class','btn btn-lg btn-danger currentStatus');
+        });
+
+        sforce.console.addEventListener('inin.salesforce.constants.consoleevent.pc.INTERACTION_DISCONNECTED', function(data){
+            console.log('Function called from CTD page');
+            console.log('**********************INTERACTION_DISCONNECTED: ' +JSON.stringify(data));
+            sforce.console.fireEvent('inin.salesforce.constants.consoleevent.changestatus', statusMap.PureCloud.available, function(data){console.log(data);});
+            sforce.console.presence.setServicePresenceStatus(statusMap.PureCloud.available);
+            console.log('**********************fireEvent:changestatus change to AVAILABLE: ' +JSON.stringify(data));
+        });
+
+        sforce.console.addEventListener('inin.salesforce.constants.consoleevent.pc.ACW_REQUIRED', function(data){
+            console.log('**********************ACW_REQUIRED: ' +JSON.stringify(data));
+        });
+
+        sforce.console.addEventListener('inin.salesforce.constants.consoleevent.pc.ACW_COMPLETED', function(data){
+            console.log('**********************ACW_COMPLETED: ' +JSON.stringify(data));
+        });
+
+        sforce.console.addEventListener('inin.salesforce.constants.consoleevent.changestatus',function(data){
+            console.log('**********************integration event listener:changestatus: ' +JSON.stringify(data));
+        });
+    </script>
+        <div id="special-heading" align="center">
+            <c:DemoTitle ></c:DemoTitle>
+            <ul class="list-group">
+                <li class="list-group-item active" align="center"><h3 class="list-group-item-heading">2.2. Status Changes (Presence)</h3></li>
+            </ul>
+            <h4><b>Scenario:</b>  This demonstrates the ability to keep your Agent's current status in sync with Salesforce and PureCloud.</h4>
+            <br />
+            <span class="statusSelection">
+                <input type="button" class="btn btn-lg btn-success" onclick="$('.currentStatus').val('Available');$('.currentStatus').attr('class','btn btn-lg btn-success currentStatus');changeStatus('available')" value="Change status to Available" /> |
+                <input type="button" class="btn btn-lg btn-info" onclick="$('.currentStatus').val('On Queue');$('.currentStatus').attr('class','btn btn-lg btn-info currentStatus');changeStatus('onQueue')" value="Change Status to On Queue" /> |
+                <input type="button" class="btn btn-lg btn-danger" onclick="$('.currentStatus').val('Busy');$('.currentStatus').attr('class','btn btn-lg btn-danger currentStatus');changeStatus('busy')" value="Change Status to Busy" /> |
+                <input type="button" class="btn btn-lg btn-warning" onclick="$('.currentStatus').val('Away');$('.currentStatus').attr('class','btn btn-lg btn-warning currentStatus');changeStatus('away')" value="Change Status to Away" />
+            </span>
+        </div>
+        <br /><br />
+        <div class="row text-center">
+            <div class="col-md-4 col-sm-6 hero-feature"></div>
+            <div class="col-md-4 col-sm-6 hero-feature">
+                <div class="thumbnail">
+                    <div class="caption">
+                        <h3>Current Status Set To</h3>
+                        <p>
+                            <apex:form >
+                                <apex:commandbutton value="Available" styleclass="btn btn-lg btn-success currentStatus" />
+                            </apex:form>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+</apex:page>
